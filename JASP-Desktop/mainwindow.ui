@@ -185,7 +185,7 @@ QPushButton::menu-indicator {
           <widget class="RibbonSummaryStatistics" name="ribbonSummaryStatistics"/>
           <widget class="RibbonMetaAnalysis" name="ribbonMetaAnalysis"/>
           <widget class="RibbonNetworkAnalysis" name="ribbonNetworkAnalysis"/>
-<!-- Add ribbon widget page -->
+          <widget class="RibbonMachineLearning" name="ribbonMachineLearning"/>
          </widget>
         </item>
         <item>
@@ -647,6 +647,12 @@ QTableView::item::last
    <container>1</container>
   </customwidget>
 <!-- Add customwidget definition -->
+  <customwidget>
+   <class>RibbonMachineLearning</class>
+   <extends>QWidget</extends>
+   <header>ribbons/ribbonmachinelearning.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>TabBar</class>
    <extends>QWidget</extends>
