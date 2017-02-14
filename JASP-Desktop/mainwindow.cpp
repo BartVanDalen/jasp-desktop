@@ -68,7 +68,8 @@
 #include "analysisforms/MetaAnalysis/classicalmetaanalysisform.h"
 #include "analysisforms/MetaAnalysis/multinomialtestform.h"
 
-///// 1-analyses headers
+#include "analysisforms/MachineLearning/mlregressionrandomforestform.h"
+
 
 #include <QDebug>
 #include <QWebFrame>
@@ -155,7 +156,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->ribbonSummaryStatistics->setDataSetLoaded(false);
 	ui->ribbonMetaAnalysis->setDataSetLoaded(false);
 	ui->ribbonNetworkAnalysis->setDataSetLoaded(false);
-///// 2-ribbon setDataSetLoaded
 
 #ifdef QT_DEBUG
 	ui->webViewResults->page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
@@ -202,8 +202,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->ribbonSummaryStatistics, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonMetaAnalysis, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonNetworkAnalysis, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
-///// 3-connect ribbon itemSelected
+    // connect(ui->backStage, SIGNAL(dataSetIORequest(FileEvent*)), this, SLOT(dataSetIORequest(FileEvent*)));
+	connect(ui->ribbonMachineLearning, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->backStage, SIGNAL(dataSetIORequest(FileEvent*)), this, SLOT(dataSetIORequest(FileEvent*)));
+
 	connect(ui->backStage, SIGNAL(exportSelected(QString)), this, SLOT(exportSelected(QString)));
 	connect(ui->variablesPage, SIGNAL(columnChanged(QString)), this, SLOT(refreshAnalysesUsingColumn(QString)));
 	connect(ui->variablesPage, SIGNAL(resetTableView()), this, SLOT(resetTableView()));
@@ -791,6 +793,13 @@ AnalysisForm* MainWindow::loadForm(const string name)
 		form = new SummaryStatsCorrelationBayesianPairsForm(contentArea);
 	else if (name == "ClassicalMetaAnalysis")
 		form = new ClassicalMetaAnalysisForm(contentArea);
+#ifdef QT_DEBUG
+	else if (name == "BASRegressionLinearLink")
+		form = new BASRegressionLinearLinkForm(contentArea);
+
+	else if (name == "MLRegressionRandomForest")
+		form = new MLRegressionRandomForestForm(contentArea);
+#endif
 	else if (name == "NetworkAnalysis")
 		form = new NetworkAnalysisForm(contentArea);
 	else if (name == "ReinforcementLearningR11tLearning")
@@ -1294,7 +1303,7 @@ void MainWindow::updateMenuEnabledDisabledStatus()
 	ui->ribbonReinforcementLearning->setDataSetLoaded(loaded);
 	ui->ribbonMetaAnalysis->setDataSetLoaded(loaded);
 	ui->ribbonNetworkAnalysis->setDataSetLoaded(loaded);
-///// 5-ribbon updateMenuEnabledDisabledStatus
+	ui->ribbonMachineLearning->setDataSetLoaded(loaded);
 }
 
 
