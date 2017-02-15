@@ -69,6 +69,7 @@
 #include "analysisforms/MetaAnalysis/multinomialtestform.h"
 
 #include "analysisforms/MachineLearning/mlregressionrandomforestform.h"
+#include "analysisforms/MachineLearning/mlregressionboostingform.h"
 
 
 #include <QDebug>
@@ -799,6 +800,8 @@ AnalysisForm* MainWindow::loadForm(const string name)
 
 	else if (name == "MLRegressionRandomForest")
 		form = new MLRegressionRandomForestForm(contentArea);
+	else if (name == "MLRegressionBoosting")
+		form = new MLRegressionBoostingForm(contentArea);
 #endif
 	else if (name == "NetworkAnalysis")
 		form = new NetworkAnalysisForm(contentArea);
