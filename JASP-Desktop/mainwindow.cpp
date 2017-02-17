@@ -73,6 +73,7 @@
 
 #include "analysisforms/MachineLearning/mlregressionrandomforestform.h"
 #include "analysisforms/MachineLearning/mlregressionboostingform.h"
+#include "analysisforms/MachineLearning/mlregressionknnform.h"
 
 
 #include <QDebug>
@@ -805,6 +806,8 @@ AnalysisForm* MainWindow::loadForm(const string name)
 		form = new MLRegressionRandomForestForm(contentArea);
 	else if (name == "MLRegressionBoosting")
 		form = new MLRegressionBoostingForm(contentArea);
+	else if (name == "MLRegressionKNN")
+		form = new MLRegressionKNNForm(contentArea);
 #endif
 	else if (name == "NetworkAnalysis")
 		form = new NetworkAnalysisForm(contentArea);
