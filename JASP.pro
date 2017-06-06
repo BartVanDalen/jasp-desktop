@@ -8,7 +8,10 @@ SUBDIRS += \
 	JASP-Common \
 	JASP-Engine \
         JASP-Desktop
+<<<<<<< HEAD
 #	JASP-Tests
+=======
+>>>>>>> removes tests from jasp.pro
 
 JASP-Desktop.depends = JASP-Common
 JASP-Engine.depends = JASP-Common
