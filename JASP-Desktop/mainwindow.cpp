@@ -75,7 +75,10 @@
 #include "analysisforms/MachineLearning/mlregressionboostingform.h"
 #include "analysisforms/MachineLearning/mlregressionknnform.h"
 #include "analysisforms/MachineLearning/mlclassificationknnform.h"
+#include "analysisforms/MachineLearning/mlclassificationboostingform.h"
+#include "analysisforms/MachineLearning/mlclassificationrandomforestform.h"
 #include "analysisforms/MachineLearning/mlclusteringkmeansform.h"
+#include "analysisforms/MachineLearning/mlclusteringrandomforestform.h"
 
 
 #include <QDebug>
@@ -814,6 +817,15 @@ AnalysisForm* MainWindow::loadForm(const string name)
 			form = new MLClassificationKNNForm(contentArea);
 	else if (name == "MLClusteringKMeans")
 		form = new MLClusteringKMeansForm(contentArea);
+    else if (name == "MLClassificationBoosting")
+        form = new MLClassificationBoostingForm(contentArea);
+    else if (name == "MLClassificationRandomForest")
+        form = new MLClassificationRandomForestForm(contentArea);
+    else if (name == "MLClusteringKMeans")
+        form = new MLClusteringKMeansForm(contentArea);
+    else if (name == "MLClusteringRandomForest")
+        form = new MLClusteringRandomForestForm(contentArea);
+
 #endif
 	else if (name == "NetworkAnalysis")
 		form = new NetworkAnalysisForm(contentArea);
