@@ -20,6 +20,7 @@
 #include "ui_ribbonmachinelearning.h"
 
 #include <QMenu>
+#include <QtDebug>
 
 RibbonMachineLearning::RibbonMachineLearning(QWidget *parent) :
 	RibbonWidget(parent),
