@@ -12,8 +12,10 @@ map<QString, Module> Module::AllModules = {
 	{ "ReinforcementLearning", Module("ReinforcementLearning", "Reinforcement Learning", 2, false)},
 	{"SummaryStats", Module("SummaryStats", "Summary Stats", 3)},
 	{"MetaAnalysis", Module("MetaAnalysis", "Meta Analysis", 4)},
-	{"Network", Module("Network", 5)}, 
-    {"MachineLearning", Module("MachineLearning", 6)}
+	{"Network", Module("Network", 5)},
+#ifdef QT_DEBUG
+	{"MachineLearning", Module("MachineLearning", "Machine Learning", 6)}
+#endif
 ///// ribbon tab number: 6
 };
 
