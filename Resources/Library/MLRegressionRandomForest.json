@@ -61,7 +61,8 @@
     },
     {
       "name": "calculateProximityMatrix",
-      "type": "Boolean"
+      "type": "Boolean",
+      "default" : false
     },
     {
       "name": "noOfTrees",
@@ -178,7 +179,8 @@
 				"pairwise",
 				"listwise",
 				"impute"
-			]
+			],
+      "default": "listwise"
 		},
     {
       "default": 640,

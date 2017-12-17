@@ -24,24 +24,24 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
     if (target == "") # default for empty target
         target <- NULL
 
-    variables.to.read <- c(target, variables)
+    variables.to.read <- c(variables)
 
     if (is.null(dataset)) { # how to handle factors?
 
         if (perform == "run") {
 
-            dataset <- .readDataSetToEnd(columns = variables.to.read, exclude.na.listwise = NULL)
+            dataset <- .readDataSetToEnd(columns = variables.to.read, columns.as.numeric = target, exclude.na.listwise = NULL)
 
         } else {
 
-            dataset <- .readDataSetHeader(columns = variables.to.read)
+            dataset <- .readDataSetHeader(columns = variables.to.read, columns.as.numeric = target)
 
         }
 
     } else {
 
         if (!Sys.getenv("RSTUDIO") == "1")
-            dataset <- .vdf(dataset, columns = variables.to.read)
+            dataset <- .vdf(dataset, columns = variables.to.read, columns.as.numeric = target)
 
     }
 
@@ -89,7 +89,7 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
     stateKey <- list(
         results = defArgs
     )
-
+    # browser()
     ## Do Analysis ## ----
 
     if (is.null(state[["results"]]) && !is.null(variables) && !is.null(target)) { # implies old state was unusable
@@ -124,7 +124,7 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         results[["plotPredictivePerformance"]] <- .MLRFplotPredPerf(toFromState = toFromState, options = options,
                                                                     perform = perform)
 
-    ## Exit Analysis ##
+    ## Exit Analysis ## ----
     if (perform == "init") {
 
         return(list(results=results, status="inited", state=state))
@@ -246,7 +246,7 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         nodesize = options[["minimumTerminalNodeSize"]],
         maxnodes = options[["maximumTerminalNodeSize"]],
         importance = TRUE, # options[["importance"]], # calc importance between rows. Always calc it, only show on user click.
-        proximity = FALSE, # options[["proximity"]], # calc proximity between rows. Always calc it, only show on user click.
+        proximity =  options[["calculateProximityMatrix"]], # calc proximity between rows. Always calc it, only show on user click.
         keep.forest = TRUE, # should probably always be TRUE (otherwise partialPlot can't be called)
         na.action = randomForest::na.roughfix
     )
