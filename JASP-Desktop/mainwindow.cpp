@@ -802,17 +802,14 @@ AnalysisForm* MainWindow::loadForm(const string name)
 	else if (name == "ClassicalMetaAnalysis")
 		form = new ClassicalMetaAnalysisForm(contentArea);
 #ifdef QT_DEBUG
-	else if (name == "BASRegressionLinearLink")
-		form = new BASRegressionLinearLinkForm(contentArea);
-
 	else if (name == "MLRegressionRandomForest")
 		form = new MLRegressionRandomForestForm(contentArea);
 	else if (name == "MLRegressionBoosting")
 		form = new MLRegressionBoostingForm(contentArea);
 	else if (name == "MLRegressionKNN")
 		form = new MLRegressionKNNForm(contentArea);
-		else if (name == "MLClassificationKNN")
-			form = new MLClassificationKNNForm(contentArea);
+	else if (name == "MLClassificationKNN")
+		form = new MLClassificationKNNForm(contentArea);
 	else if (name == "MLClusteringKMeans")
 		form = new MLClusteringKMeansForm(contentArea);
     else if (name == "MLClassificationBoosting")
@@ -823,7 +820,6 @@ AnalysisForm* MainWindow::loadForm(const string name)
         form = new MLClusteringKMeansForm(contentArea);
     else if (name == "MLClusteringRandomForest")
         form = new MLClusteringRandomForestForm(contentArea);
-
 #endif
 	else if (name == "NetworkAnalysis")
 		form = new NetworkAnalysisForm(contentArea);
