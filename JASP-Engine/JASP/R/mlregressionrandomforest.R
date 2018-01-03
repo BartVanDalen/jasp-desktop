@@ -23,51 +23,51 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
     target <- options[["target"]]
     if (target == "") # default for empty target
         target <- NULL
-    
-    variables.to.read <- c(target, variables)
-    
+
+    variables.to.read <- c(variables)
+
     if (is.null(dataset)) { # how to handle factors?
-        
+
         if (perform == "run") {
-            
-            dataset <- .readDataSetToEnd(columns = variables.to.read, exclude.na.listwise = NULL)
-            
+
+            dataset <- .readDataSetToEnd(columns = variables.to.read, columns.as.numeric = target, exclude.na.listwise = NULL)
+
         } else {
-            
-            dataset <- .readDataSetHeader(columns = variables.to.read)
-            
+
+            dataset <- .readDataSetHeader(columns = variables.to.read, columns.as.numeric = target)
+
         }
-        
+
     } else {
-        
+
         if (!Sys.getenv("RSTUDIO") == "1")
-            dataset <- .vdf(dataset, columns = variables.to.read)
-        
+            dataset <- .vdf(dataset, columns = variables.to.read, columns.as.numeric = target)
+
     }
-    
+
     # This problem can occur when reading the dataset with the columns argument: (reference: http://stackoverflow.com/questions/41441665/how-to-fix-a-malformed-factor)
     # vec <- structure(c(1L,2L, 33L), .Label = c("first", "second"), class = "factor")
     # print(vec)
     # levels(vec) <- levels(vec)
     # print(vec)
-    
+
     # This fixes it:
     colIdx <- sapply(dataset, is.factor)
     if (is.logical(colIdx)) {
-        
+
         seqFactor <- which(colIdx)
         for (var in seqFactor)
             levels(dataset[[var]]) <- levels(dataset[[var]])
-        
+
     }
     print("str(dataset)")
     print(str(dataset))
-    
+
     # ensures order of variables matches order of columns in dataset (first column is target)
     variables <- variables[match(colnames(dataset), .v(variables), nomatch = 0L)]
-    
+
     ## Initialize Results ## ----
-    
+
     results <- list(
         title = "Random Forest Regression",
         .meta = list(
@@ -89,48 +89,49 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
     stateKey <- list(
         results = defArgs
     )
-    
+
+    # browser()
     ## Do Analysis ## ----
-    
+
     if (is.null(state[["results"]]) && !is.null(variables) && !is.null(target)) { # implies old state was unusable
-        
+
         # check for errors
         .hasErrors(dataset = dataset, perform = perform, type = c("infinity", "variance"),
                    exitAnalysisIfErrors = TRUE)
-        
+
         toFromState <- .MLRFAnalysis(dataset, purpose = "regression", perform = perform,
                                      options = options, variables = variables, target = target)
-        
+
     } else { # results are retrieved from state
         toFromState <- state[["results"]]
     }
-    
-    
+
+
     ## Create Output ## ----
     results[["tableSummary"]] <- .MLRFSummary(toFromState = toFromState, variables = variables, perform = perform)
-    
+
     if (options[["tableVariableImportance"]])
         results[["tableVariableImportance"]] <- .MLRFVarImpTb(toFromState = toFromState, variables = variables, perform = perform)
-    
+
     if (options[["plotTreesVsModelError"]])
         results[["plotTreesVsModelError"]] <- .MLRFplotTreesVsModelError(toFromState = toFromState, options = options,
                                                                          perform = perform)
-    
+
     if (options[["plotVariableImportance"]])
         results[["plotVariableImportance"]] <- .MLRFplotVariableImportance(toFromState = toFromState, options = options,
                                                                            variables = variables, perform = perform)
-    
+
     if (options[["plotPredictivePerformance"]])
         results[["plotPredictivePerformance"]] <- .MLRFplotPredPerf(toFromState = toFromState, options = options,
                                                                     perform = perform)
-    
-    ## Exit Analysis ##
+
+    ## Exit Analysis ## ----
     if (perform == "init") {
-        
+
         return(list(results=results, status="inited", state=state))
-        
+
     } else {
-        
+
         # Create State
         state <- list(
             options                    = options,
@@ -140,76 +141,76 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
             #	    plotPredictivePerformance  = results[["plotPredictivePerformance"]]
         )
         attr(state, "key") <- stateKey
-        
+
         return(list(results=results, status="complete", state=state))
-        
+
     }
 }
 
 .MLRFAnalysis <- function(dataset, purpose, options, variables, target, perform) {
-    
+
     # early exit on unusable input -- needs modification for unsupervised RF
     if (any(perform != "run", is.null(variables), is.null(target)))
         return(NULL)
-    
+
     preds <- .v(variables) # predictors
     target <- .v(target) # targets
-    browser()
+    # browser()
     # deal with missings
     if (options[["missingValues"]] == "listwise") {
-        
+
         dataset <- dataset[complete.cases(dataset), ]
 
     } else {
         stop("Not supported yet.")
     }
-    
+
     # training and test data
     n <- nrow(dataset)
-    
+
     # defaults for everything set to "auto"
     if (options[["noOfTrees"]] == "auto") {
         options[["noOfTrees"]] <- 500
     } else if (options[["noOfTrees"]] == "manual") {
         options[["noOfTrees"]] <- as.integer(options[["numberOfTrees"]])
     }
-    
+
     if (options[["noOfPredictors"]] == "auto") {
         options[["noOfPredictors"]] <- max(c(floor(length(variables) / 3), 1))
     } else if (options[["noOfPredictors"]] == "manual") {
         options[["noOfPredictors"]] <- as.integer(options[["numberOfPredictors"]])
     }
-    
+
     if (options[["dataBootstrapModel"]] == "auto") {
         options[["dataBootstrapModel"]] <- ceiling(.632*n)
     } else if (options[["dataBootstrapModel"]] == "manual") {
         options[["dataBootstrapModel"]] <- ceiling(options[["numberDataBootstrap"]]/100*n)
     }
-    
+
     if (options[["maximumTerminalNodeSize"]] == "auto") {
         options[["maximumTerminalNodeSize"]] <- NULL
     } else if (options[["maximumTerminalNodeSize"]] == "manual") {
         options[["maximumTerminalNodeSize"]] <- as.integer(options[["modelMaximumTerminalNode"]])
     }
-    
+
     if (options[["minimumTerminalNodeSize"]] == "auto") {
         options[["minimumTerminalNodeSize"]] <- 5
     } else if (options[["minimumTerminalNodeSize"]] == "manual") {
         options[["minimumTerminalNodeSize"]] <- as.integer(options[["modelMinimumTerminalNode"]])
     }
-    
+
     if (options[["seedBox"]] == "manual") {
         set.seed(options[["seed"]])
     } else {
         set.seed(Sys.time())
     }
-    
+
     if (options[["dataTrainingModel"]] == "auto") { # aanpassen! check CI whether [0, 1] or [0, 100]
         options[["dataTrainingModel"]] <- 80
     } else if (options[["dataTrainingModel"]] == "manual") {
         options[["dataTrainingModel"]] <- options[["percentageDataTraining"]]  # removed as.integer()
     }
-    
+
     if (options[["dataTrainingModel"]] < 100) {
         idxTrain <- sample(1:n, floor(options[["dataTrainingModel"]]/100*n))
         idxTest <- (1:n)[-idxTrain]
@@ -217,23 +218,23 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         idxTrain <- 1:n
         idxTest <- integer(0L)
     }
-    
+
     if (purpose %in% c("classification", "regression")) {
-        
+
         xTrain <- dataset[idxTrain, preds, drop = FALSE]
         yTrain <- dataset[idxTrain, target]
         xTest <- dataset[idxTest, preds, drop = FALSE]
         yTest <- dataset[idxTest, target]
-        
+
     } else { # unsupervised
-        
+
         xTrain <- dataset[, preds, drop = FALSE]
         yTrain <- NULL
         xTest <- NULL
         yTest <- NULL
-        
+
     }
-    
+
     # run RF
     res <- randomForest::randomForest(
         x = xTrain,
@@ -246,25 +247,25 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         nodesize = options[["minimumTerminalNodeSize"]],
         maxnodes = options[["maximumTerminalNodeSize"]],
         importance = TRUE, # options[["importance"]], # calc importance between rows. Always calc it, only show on user click.
-        proximity = FALSE, # options[["proximity"]], # calc proximity between rows. Always calc it, only show on user click.
+        proximity =  options[["calculateProximityMatrix"]], # calc proximity between rows. Always calc it, only show on user click.
         keep.forest = TRUE, # should probably always be TRUE (otherwise partialPlot can't be called)
         na.action = randomForest::na.roughfix
     )
-    
+
     return(list(res = res,
                 data = list(xTrain = xTrain, yTrain = yTrain,
                             xTest = xTest, yTest = yTest)))
-    
+
 }
 
 # Summary table
 .MLRFSummary <- function(toFromState, variables, perform) {
-    
+
     table <- list(title = "Summary")
-    
+
     intNms = c("MSE", "MDiA", "MDiNI", "NPred") # internal names
     extNms = c("MSE", "% var explained", "No. of trees", "No. of predictors") # external names
-    
+
     table[["schema"]] <- list(
         fields = list(list(name="case", title="", type="string", combine=TRUE),
                       list(name = intNms[1], title = extNms[1], type="number", format="dp:3"),
@@ -272,15 +273,16 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
                       list(name = intNms[3], title = extNms[3], type="integer", format="dp:0"),
                       list(name = intNms[4], title = extNms[4], type="integer", format="dp:0"))
     )
-    
+
+
     if (any(perform != "run", is.null(toFromState), is.null(variables))) { # no/ bad input
-        
+
         toTable <- matrix(".", nrow = 1, ncol = 4,
                           dimnames = list(".", intNms))
-        
+
     } else { # input that can become an actual table
         # browser()
-        
+
         # matrix for conversion to markup table
         res <- toFromState[["res"]]
         toTable <- list(
@@ -290,48 +292,51 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
             res[["ntree"]],
             res[["mtry"]]
         )
-        
+
+
         names(toTable) <- c("case", intNms)
-        
+
     }
-    
+
     footnotes <- .newFootnotes()
-    
+
     # 1 - toFromState$res$mse[500] / (var(toFromState$data$yTrain) * (n - 1)/n)
     if (toTable[3] < 0) { # TODO: figure out why this happens! 1 - MSE / var(y)
         msg <- "Pseudo explained variance was negative indicating poor model fit."
         .addFootnote(footnotes, text = msg, symbol = "<em>Warning: </em>")
     }
-    
+
     table[["data"]] <- .TBcolumns2TBrows(toTable)
     table[["footnotes"]] <- as.list(footnotes)
-    
+
     return(table)
-    
+
 }
 
 # Variable importance table
 .MLRFVarImpTb <- function(toFromState, variables, perform) {
-    
+
+
     table <- list(title = "Variable Importance")
-    
+
     intNms = c("MDiA", "MDiNI") # internal names
     extNms = c("Mean decrease in accuracy", "Mean decrease in node impurity") # external names
-    
+
     if (any(perform != "run", is.null(toFromState), is.null(variables))) { # no/ bad input
-        
+
         toTable <- matrix(".", nrow = 1, ncol = 2,
                           dimnames = list(".", intNms))
-        
+
     } else { # input that can become an actual table
-        
+
         # matrix for conversion to markup table
         toTable <- randomForest::importance(toFromState$res)
         toTable <- toTable[order(toTable[, 1], decreasing = TRUE), , drop = FALSE]
         colnames(toTable) <- intNms
         rownames(toTable) <- variables[sort(randomForest::importance(toFromState$res)[,1], decr=T, index.return=T)$ix]
     }
-    
+
+
     # fields = list(list(name="case", title="", type="string", combine=TRUE))
     #
     # for (i in seq_along(intNms)) {
@@ -339,53 +344,54 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
     # 	fields[[i]] <- list(name = intNms[i], name = extNms[i], type = type[i],
     #
     # }
-    
+
     table[["schema"]] <- list(
         fields = list(list(name="case", title="", type="string", combine=TRUE),
                       list(name = intNms[1], title = extNms[1], type="number", format="sf:4;dp:3"),
                       list(name = intNms[2], title = extNms[2], type="number", format="sf:4;dp:3"))
     )
-    
+
+
     table[["data"]] <- .MLRFTables(toTable)
-    
+
     return(table)
-    
+
 }
 
 .MLRFTables <- function(x) {
-    
+
     n = nrow(x)
     m = ncol(x)
-    
+
     fieldNames = c("case", colnames(x))
     rmns = rownames(x)
-    
+
     emptyRow <- vector("list", length = length(fieldNames))
     names(emptyRow) <- fieldNames
-    
+
     data <- rep(list(emptyRow), n)
-    
+
     if (is.numeric(x)) { # implies .clean must be used
         for (i in seq_len(n)) {
-            
+
             data[[i]] <- c(case = rmns[i], lapply(x[i, ], .clean))
-            
+
         }
     } else {
         for (i in seq_len(n)) {
-            
+
             data[[i]] <- c(case = rmns[i], x[i, ])
-            
+
         }
     }
-    
+
     return(data)
-    
+
 }
 
 # Variable importance plot
 .MLRFplotVariableImportance <- function(toFromState, options, variables, perform) {
-    
+
     rfPlot <- list(
         title = "Relative Importance of Variables",
         width = options[["plotWidth"]],
@@ -393,11 +399,11 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         custom = list(width = "plotWidth", height = "plotHeight"),
         data = ""
     )
-    
+
     if (perform == "run" && !is.null(toFromState)) { # are there results to plot?
-        
+
         res <- toFromState[["res"]]
-        
+
         if (options[["plotImportance"]] == "plotAccuracy") {
             impType <- 1
             xlabImpPlot <- "Mean decrease in accuracy"
@@ -405,17 +411,17 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
             impType <- 2
             xlabImpPlot <- "Mean decrease in node impurity"
         }
-        
+
         toPlot <- data.frame(
             Feature = variables,
             Importance = unname(randomForest::importance(toFromState$res, type = impType))
         )
         toPlot <- toPlot[order(toPlot[["Importance"]], decreasing = FALSE), ]  # HELEN: decr=F
-        
+
         axisLimits <- range(pretty(toPlot[["Importance"]]))
         axisLimits[1] <- min(c(0, axisLimits[1]))
         axisLimits[2] <- max(c(0, axisLimits[2]))
-        
+
         # p <- ggplot2::ggplot(toPlot, ggplot2::aes(x=reorder(Feature, Importance), y=Importance)) +
         # 	ggplot2::geom_bar(stat="identity", fill="gray40") +
         # 	ggplot2::coord_flip() +
@@ -425,31 +431,32 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         # 								limits = axisLimits) +
         # ggplot2::ggtitle("Relative Importance of Variables") +
         # ggplot2::theme(plot.title = ggplot2::element_text(size=18))
-        
+
+
         content = ""
         if (!Sys.getenv("RSTUDIO") == "1")
             image <- .beginSaveImage(width = options[["plotWidth"]], height = options[["plotHeight"]])
-        
+
         #print(p)
         barplot(toPlot[[2]], names.arg = toPlot[[1]], horiz = TRUE, xlab = xlabImpPlot, las = 1)
-        
-        
+
+
         if (!Sys.getenv("RSTUDIO") == "1") {
             content <- .endSaveImage(image)
         }
-        
+
         rfPlot[["data"]] <- content
         rfPlot[["status"]] <- "completed"
-        
+
     }
-    
+
     return(rfPlot)
-    
+
 }
 
 # No. of trees vs model error plot
 .MLRFplotTreesVsModelError <- function(toFromState, options, perform) {
-    
+
     rfPlot <- list(
         title = "Number of trees vs model error",
         width = options[["plotWidth"]],
@@ -457,69 +464,71 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         custom = list(width = "plotWidth", height = "plotHeight"),
         data = ""
     )
-    
+
+
     if (perform == "run" && !is.null(toFromState)) { # are there results to plot?
-        
+
         res <- toFromState[["res"]]
         x <- 1:res[["ntree"]]
-        
+
         if (res[["type"]] == "regression") {
-            
+
             y <- res[["mse"]]
             yl <- "Mean Squared Error"
-            
+
         } else if (res[["type"]] == "classification") {
-            
+
             y <- res[["err.rate"]]
             yl <- "Error rate"
-            
+
         } else { # res[["type"]] == "unsupervised"
-            
+
             # there is no plot for unsupervised in the RF package
             # the help page uses MDSplot, but this is something very different
             # it makes a custom call to stats::cmdscales
             # We could make something? I do not know what is regularly used
             # randomForest::MDSplot(res, data[, "Species"])
-            
+
+
         }
-        
+
         rfPlot[["title"]] <- paste0(rfPlot[["title"]], " (", yl, ")")
-        
+
         if (res$type != "unsupervised") {
-            
+
             # install.packages("ggplot2", dependencies = TRUE,
             # 				 lib = "C:/Users/donvd/OneDrive/Documenten/EJgit/build-JASP-JASP_64-Debug/R/library")
-            
+
             # g <- drawCanvas(xName = "Trees", yName = yl, xBreaks = pretty(x), yBreaks = pretty(y))
             # g <- drawLines(g, df = data.frame(x = x, y = y), color = "gray",  show.legend = FALSE)
             # g <- themeJasp(g)
-            
+
             content <- ""
             if (!Sys.getenv("RSTUDIO") == "1")
                 image <- .beginSaveImage(width = options[["plotWidth"]], height = options[["plotHeight"]])
-            
+
             matplot(x, y, bty = "n", las = 1, xlab = "Trees", ylab = yl, type = "l", lwd = 2)
             # print(g)
-            
+
             if (!Sys.getenv("RSTUDIO") == "1")
                 content <- .endSaveImage(image)
-            
+
             rfPlot[["data"]] <- content
-            
+
         }
-        
+
         rfPlot[["status"]] <- "completed"
         # staterfPlot = rfPlot
-        
+
     }
-    
+
     return(rfPlot)
-    
+
 }
 
 # Predictive performance plot
 .MLRFplotPredPerf <- function(toFromState, options, perform) {
-    
+
     rfPlot <- list(
         title = "Predicted performance for test data",
         width = options[["plotWidth"]],
@@ -527,67 +536,70 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         custom = list(width = "plotWidth", height = "plotHeight"),
         data = ""
     )
-    
+
+
     if (perform == "run" && !is.null(toFromState)) { # are there results to plot?
-        
+
         res <- toFromState[["res"]]
         data <- toFromState[["data"]]
         x <- data[["yTest"]]
-        
+
         if (res[["type"]] == "regression") {
-            
+
             y <- predict(res, data[["xTest"]]) #1:length(data[["yTest"]])
             yl <- "Predicted"
-            
+
         } else if (res[["type"]] == "classification") {
-            
+
             y <- res[["err.rate"]]
             yl <- "Error rate"
-            
+
         } else { # res[["type"]] == "unsupervised"
-            
+
             # there is no plot for unsupervised in the RF package
             # the help page uses MDSplot, but this is something very different
             # it makes a custom call to stats::cmdscales
             # We could make something? I do not know what is regularly used
             # randomForest::MDSplot(res, data[, "Species"])
-            
+
+
         }
-        
+
         #rfPlot[["title"]] <- paste0(rfPlot[["title"]], " (", yl, ")")
-        
+
         if (res$type != "unsupervised") {
-            
+
             # install.packages("ggplot2", dependencies = TRUE,
             # 				 lib = "C:/Users/donvd/OneDrive/Documenten/EJgit/build-JASP-JASP_64-Debug/R/library")
-            
+
             # g <- drawCanvas(xName = "Trees", yName = yl, xBreaks = pretty(x), yBreaks = pretty(y))
             # g <- drawLines(g, df = data.frame(x = x, y = y), color = "gray",  show.legend = FALSE)
             # g <- themeJasp(g)
-            
+
             content <- ""
             if (!Sys.getenv("RSTUDIO") == "1")
                 image <- .beginSaveImage(width = options[["plotWidth"]], height = options[["plotHeight"]])
-            
+
             maxRange <- ceiling(max(x, y))
             matplot(x, y, bty = "n", las = 1, xlab = "Observed", ylab = yl, lwd = 2, pch = 1,
                     xlim = c(1, maxRange), ylim = c(1, maxRange),
                     cex.axis=1.2, cex.lab=1.4, cex.main=1.2, bty="n")
             lines(1:maxRange, 1:maxRange)
             # print(g)
-            
+
+
             if (!Sys.getenv("RSTUDIO") == "1")
                 content <- .endSaveImage(image)
-            
+
             rfPlot[["data"]] <- content
-            
+
         }
-        
+
         rfPlot[["status"]] <- "completed"
         # staterfPlot = rfPlot
-        
+
     }
-    
+
     return(rfPlot)
-    
+
 }

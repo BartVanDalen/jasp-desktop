@@ -186,6 +186,7 @@ QPushButton::menu-indicator {
           <widget class="RibbonMetaAnalysis" name="ribbonMetaAnalysis"/>
           <widget class="RibbonNetworkAnalysis" name="ribbonNetworkAnalysis"/>
           <widget class="RibbonMachineLearning" name="ribbonMachineLearning"/>
+          <!-- Add ribbon widget page -->
          </widget>
         </item>
         <item>

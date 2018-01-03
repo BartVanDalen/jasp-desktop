@@ -163,7 +163,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->ribbonSummaryStatistics->setDataSetLoaded(false);
 	ui->ribbonMetaAnalysis->setDataSetLoaded(false);
 	ui->ribbonNetworkAnalysis->setDataSetLoaded(false);
-    ui->ribbonMachineLearning->setDataSetLoaded(false);
+	ui->ribbonMachineLearning->setDataSetLoaded(false);
 
 #ifdef QT_DEBUG
 	ui->webViewResults->page()->settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
@@ -210,8 +210,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->ribbonSummaryStatistics, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonMetaAnalysis, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonNetworkAnalysis, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
-    // connect(ui->backStage, SIGNAL(dataSetIORequest(FileEvent*)), this, SLOT(dataSetIORequest(FileEvent*)));
 	connect(ui->ribbonMachineLearning, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
+    ///// 3-connect ribbon itemSelected
 	connect(ui->backStage, SIGNAL(dataSetIORequest(FileEvent*)), this, SLOT(dataSetIORequest(FileEvent*)));
 
 	connect(ui->backStage, SIGNAL(exportSelected(QString)), this, SLOT(exportSelected(QString)));
@@ -802,17 +802,14 @@ AnalysisForm* MainWindow::loadForm(const string name)
 	else if (name == "ClassicalMetaAnalysis")
 		form = new ClassicalMetaAnalysisForm(contentArea);
 #ifdef QT_DEBUG
-	else if (name == "BASRegressionLinearLink")
-		form = new BASRegressionLinearLinkForm(contentArea);
-
 	else if (name == "MLRegressionRandomForest")
 		form = new MLRegressionRandomForestForm(contentArea);
 	else if (name == "MLRegressionBoosting")
 		form = new MLRegressionBoostingForm(contentArea);
 	else if (name == "MLRegressionKNN")
 		form = new MLRegressionKNNForm(contentArea);
-		else if (name == "MLClassificationKNN")
-			form = new MLClassificationKNNForm(contentArea);
+	else if (name == "MLClassificationKNN")
+		form = new MLClassificationKNNForm(contentArea);
 	else if (name == "MLClusteringKMeans")
 		form = new MLClusteringKMeansForm(contentArea);
     else if (name == "MLClassificationBoosting")
@@ -823,7 +820,6 @@ AnalysisForm* MainWindow::loadForm(const string name)
         form = new MLClusteringKMeansForm(contentArea);
     else if (name == "MLClusteringRandomForest")
         form = new MLClusteringRandomForestForm(contentArea);
-
 #endif
 	else if (name == "NetworkAnalysis")
 		form = new NetworkAnalysisForm(contentArea);

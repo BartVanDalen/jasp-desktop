@@ -57,7 +57,7 @@ RibbonMachineLearning::RibbonMachineLearning(QWidget *parent) :
     menu->addAction(QString("k-Means"), this, SLOT(itemSelected()))->setObjectName("MLClusteringKMeans");
     menu->addAction(QString("Random forest"), this, SLOT(itemSelected()))->setObjectName("MLClusteringRandomForest");
 
-	ui->clusteringButton->setMenu(menu); 
+	ui->clusteringButton->setMenu(menu);
 }
 
 RibbonMachineLearning::~RibbonMachineLearning()
