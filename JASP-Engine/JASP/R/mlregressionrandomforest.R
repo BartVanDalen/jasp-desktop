@@ -99,6 +99,7 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         .hasErrors(dataset = dataset, perform = perform, type = c("infinity", "variance"),
                    exitAnalysisIfErrors = TRUE)
 
+        print("ANALYSIS WAS DONE")
         toFromState <- .MLRFAnalysis(dataset, purpose = "regression", perform = perform,
                                      options = options, variables = variables, target = target)
 
@@ -108,27 +109,37 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
 
 
     ## Create Output ## ----
+    keep <- NULL
     results[["tableSummary"]] <- .MLRFSummary(toFromState = toFromState, variables = variables, perform = perform)
 
     if (options[["tableVariableImportance"]])
         results[["tableVariableImportance"]] <- .MLRFVarImpTb(toFromState = toFromState, variables = variables, perform = perform)
 
-    if (options[["plotTreesVsModelError"]])
+    if (options[["plotTreesVsModelError"]]) {
         results[["plotTreesVsModelError"]] <- .MLRFplotTreesVsModelError(toFromState = toFromState, options = options,
                                                                          perform = perform)
+        keep <- c(keep, results[["plotTreesVsModelError"]][["data"]])
+    }
 
-    if (options[["plotVariableImportance"]])
+    if (options[["plotVariableImportance"]]) {
         results[["plotVariableImportance"]] <- .MLRFplotVariableImportance(toFromState = toFromState, options = options,
                                                                            variables = variables, perform = perform)
+        keep <- c(keep, results[["plotVariableImportance"]][["data"]])
+    }
 
-    if (options[["plotPredictivePerformance"]])
+    if (options[["plotPredictivePerformance"]]) {
         results[["plotPredictivePerformance"]] <- .MLRFplotPredPerf(toFromState = toFromState, options = options,
                                                                     perform = perform)
+        keep <- c(keep, results[["plotPredictivePerformance"]][["data"]])
+    }
 
     ## Exit Analysis ## ----
     if (perform == "init") {
 
-        return(list(results=results, status="inited", state=state))
+        # TODO: find out why this is not kept by default!
+        if (!is.null(state))
+            attr(state, "key") <- stateKey
+        return(list(results=results, status="inited", state=state, keep = keep))
 
     } else {
 
@@ -142,7 +153,7 @@ MLRegressionRandomForest <- function(dataset = NULL, options, perform = "run",
         )
         attr(state, "key") <- stateKey
 
-        return(list(results=results, status="complete", state=state))
+        return(list(results=results, status="complete", state=state, keep = keep))
 
     }
 }
