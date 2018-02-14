@@ -69,6 +69,15 @@
 #include "analysisforms/MetaAnalysis/classicalmetaanalysisform.h"
 
 
+#include "analysisforms/MachineLearning/mlregressionrandomforestform.h"
+#include "analysisforms/MachineLearning/mlregressionboostingform.h"
+#include "analysisforms/MachineLearning/mlregressionknnform.h"
+#include "analysisforms/MachineLearning/mlclassificationknnform.h"
+#include "analysisforms/MachineLearning/mlclassificationboostingform.h"
+#include "analysisforms/MachineLearning/mlclassificationrandomforestform.h"
+#include "analysisforms/MachineLearning/mlclusteringkmeansform.h"
+#include "analysisforms/MachineLearning/mlclusteringrandomforestform.h"
+
 ///// 1-analyses headers
 
 #include <QDebug>
@@ -152,6 +161,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->ribbonSummaryStatistics->setDataSetLoaded(false);
 	ui->ribbonMetaAnalysis->setDataSetLoaded(false);
 	ui->ribbonNetworkAnalysis->setDataSetLoaded(false);
+	ui->ribbonMachineLearning->setDataSetLoaded(false);
 ///// 2-ribbon setDataSetLoaded
 
 	tempfiles_init(ProcessInfo::currentPID()); // needed here so that the LRNAM can be passed the session directory
@@ -188,6 +198,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->ribbonSummaryStatistics, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonMetaAnalysis, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->ribbonNetworkAnalysis, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
+	connect(ui->ribbonMachineLearning, SIGNAL(itemSelected(QString)), this, SLOT(itemSelected(QString)));
 	connect(ui->backStage, SIGNAL(dataSetIORequest(FileEvent*)), this, SLOT(dataSetIORequest(FileEvent*)));
 	connect(ui->backStage, SIGNAL(exportSelected(QString)), _resultsJsInterface, SLOT(exportSelected(QString)));
 	connect(ui->variablesPage, SIGNAL(columnChanged(QString)), this, SLOT(refreshAnalysesUsingColumn(QString)));
@@ -727,9 +738,32 @@ AnalysisForm* MainWindow::loadForm(const string name)
 		form = new NetworkAnalysisForm(contentArea);
 	else if (name == "ReinforcementLearningR11tLearning")
 		form = new ReinforcementLearningR11tLearningForm(contentArea);
+#ifdef QT_DEBUG
+	else if (name == "MLRegressionRandomForest")
+		form = new MLRegressionRandomForestForm(contentArea);
+	else if (name == "MLRegressionBoosting")
+		form = new MLRegressionBoostingForm(contentArea);
+	else if (name == "MLRegressionKNN")
+		form = new MLRegressionKNNForm(contentArea);
+	else if (name == "MLClassificationKNN")
+		form = new MLClassificationKNNForm(contentArea);
+	else if (name == "MLClusteringKMeans")
+		form = new MLClusteringKMeansForm(contentArea);
+	else if (name == "MLClassificationBoosting")
+		form = new MLClassificationBoostingForm(contentArea);
+	else if (name == "MLClassificationRandomForest")
+		form = new MLClassificationRandomForestForm(contentArea);
+	else if (name == "MLClusteringKMeans")
+		form = new MLClusteringKMeansForm(contentArea);
+	else if (name == "MLClusteringRandomForest")
+		form = new MLClusteringRandomForestForm(contentArea);
+#endif
 ///// 4-analysis if-else ladder
 	else
-		qDebug() << "MainWindow::loadForm(); form not found : " << name.c_str();
+	{
+		std::cout << "MainWindow::loadForm(); form not found : " << name.c_str();
+		std::cout.flush();
+	}
 
 	if (form != NULL)
 		_analysisForms[name] = form;
@@ -1224,6 +1258,7 @@ void MainWindow::updateMenuEnabledDisabledStatus()
 	ui->ribbonReinforcementLearning->setDataSetLoaded(loaded);
 	ui->ribbonMetaAnalysis->setDataSetLoaded(loaded);
 	ui->ribbonNetworkAnalysis->setDataSetLoaded(loaded);
+	ui->ribbonMachineLearning->setDataSetLoaded(loaded);
 ///// 5-ribbon updateMenuEnabledDisabledStatus
 }
 

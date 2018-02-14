@@ -1,0 +1,190 @@
+{
+	"name": "MLRegressionKNN",
+	"autorun": true,
+	"version": "1.00",
+	"options": [
+		{
+			"name": "target",
+			"type": "Variable"
+		},
+		{
+			"name": "predictors",
+			"type": "Variables"
+		},
+		{
+			"name": "indicator",
+			"type": "Variable"
+		},
+		{
+			"name": "percentageTrainingData",
+			"type": "List",
+			"options": [ "auto", "manual" ],
+			"default": "auto"
+		},
+		{
+			"name": "trainingDataManual",
+            "type": "Integer",
+            "default": 80,
+            "min": 1,
+            "max": 99
+		},
+		{
+			"name": "noOfNearestNeighbours",
+			"type": "List",
+			"options": [ "auto", "manual", "optimized" ],
+			"default": "auto"
+		},
+		{
+			"name": "nearestNeighboursCount",
+            "type": "Integer",
+            "default": 1
+		},
+		{
+			"name": "optimizedFrom",
+            "type": "Integer",
+            "default": 1
+		},
+		{
+			"name": "optimizedTo",
+            "type": "Integer",
+            "default": 2
+		},
+		{
+			"name": "tablePredictions",
+			"type": "Boolean"
+		},
+		{
+			"name": "tableDistances",
+			"type": "Boolean"
+		},
+		{
+			"name": "tableWeights",
+			"type": "Boolean"
+		},
+		{
+			"name": "plotErrorVsK",
+			"type": "Boolean"
+		},
+		{
+			"name": "naAction",
+			"type": "List",
+			"options": [ "deleteListwise", "predict", "roughFix" ],
+			"default": "deleteListwise"
+		},
+		{
+			"name": "distanceParameter",
+			"type": "List",
+            "options": [ "auto", "manual" ],
+			"default": "auto"
+		},
+        {
+            "name": "distanceParameterManual",
+            "type": "Number",
+            "value": 1,
+            "min": 0.1
+        },
+		{
+			"name": "scaleEqualSD",
+			"type": "Boolean"
+		},
+		{
+			"name": "validationLeaveOneOut",
+			"type": "Boolean"
+		},
+		{
+			"name": "validationKFold",
+			"type": "Boolean"
+		},
+		{
+			"name": "noOfFolds",
+            "type": "Integer",
+            "default": 4,
+            "min": 1
+        },
+        {
+            "name": "weights",
+            "type": "List",
+            "options": ["unweighted", "optimal", "triangular", "epanechnikov" , "biweight", "triweight", "cos", "inv", "gaussian", "rank" ],
+            "default": "unweighted"
+        },
+        {
+            "name": "predictionsFrom",
+            "type": "Integer",
+            "min": 1,
+            "max": 999999,
+            "default": 1
+        },
+        {
+            "name": "predictionsTo",
+            "type": "Integer",
+            "min": 1,
+            "max": 999999,
+            "default": 10
+        },
+        {
+            "name": "optimizeModel",
+            "type": "Boolean",
+            "default": false
+        },
+        {
+            "name": "optimizeModelMaxK",
+            "type": "Integer",
+            "default": 10,
+            "min": 1,
+            "max": 100
+        },
+        {
+            "name": "optimizeModelMaxD",
+            "type": "Number",
+            "value": 10,
+            "min": 1,
+            "max": 100
+        },
+        {
+            "default": 640,
+            "name": "plotWidth",
+            "type": "Integer"
+        },
+        {
+            "default": 480,
+            "name": "plotHeight",
+            "type": "Integer"
+        },
+        {
+            "name": "seed",
+            "type": "Integer",
+            "min": 1,
+            "max": 999,
+            "default": 123
+        },
+        {
+            "name": "newPredictions",
+            "type": "Boolean",
+            "default": false
+        },
+        {
+            "name": "accuracyPlot",
+            "type": "Boolean",
+            "default": false
+        },
+        {
+            "name": "predFrom",
+            "type": "Integer",
+            "default": 1,
+            "min": 1,
+            "max": 999
+        },
+        {
+            "name": "predTo",
+            "type": "Integer",
+            "default": 10,
+            "max": 999,
+            "min": 1
+        },
+        {
+            "name": "seedBox",
+            "type": "Boolean",
+        }
+
+	]
+}

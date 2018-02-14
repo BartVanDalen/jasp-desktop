@@ -103,6 +103,34 @@
 		]
 	},
 	{
+		"name": "Machine Learning",
+		"ribbon": [
+			{
+				"name": "Regression",
+				"analyses": [
+					"Boosting",
+					"k-Nearest neighbors",
+					"Random forest"
+				]
+			},
+			{
+				"name": "Classification",
+				"analyses": [
+					"Boosting",
+					"k-Nearest neighbors",
+					"Random forest"
+				]
+			},
+			{
+				"name": "Clustering",
+				"analyses": [
+					"k-Means",
+					"Random forest"
+				]
+			}
+		]
+	},
+	{
 		"name": "Meta Analysis",
 		"ribbon": [
 			{
